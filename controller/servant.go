@@ -85,7 +85,7 @@ func SearchServant(c echo.Context) (err error) {
         servants = append(servants, model.Servant{
             ID:        s.ID,
             Name:      s.Name,
-            ClassIcon: fmt.Sprintf(constant.AtlasAcademyClassIcon, int(math.Min(3, float64(s.Rarity))), s.ClassID),
+            ClassIcon: fmt.Sprintf(constant.AtlasAcademyClassIcon, classIconFilename(s.Rarity, s.ClassID)),
             Icon:      s.ExtraAssets.Faces.Ascension["1"],
         })
     }
@@ -155,7 +155,7 @@ func GetServant(c echo.Context) (err error) {
     servant := model.Servant{
         ID:                 s.ID,
         Name:               s.Name,
-        ClassIcon:          fmt.Sprintf(constant.AtlasAcademyClassIcon, int(math.Min(3, float64(s.Rarity))), s.ClassID),
+        ClassIcon:          fmt.Sprintf(constant.AtlasAcademyClassIcon, classIconFilename(s.Rarity, s.ClassID)),
         Icon:               s.ExtraAssets.Faces.Ascension["1"],
         Portraits:          portraits,
         Skills:             skills,
@@ -199,4 +199,8 @@ func processMaterialList(ml map[string]materials) []model.MaterialList {
     }
 
     return m
+}
+
+func classIconFilename(r int, cid int) string {
+    return fmt.Sprintf("%d_%d", int(math.Min(3, float64(r))), cid)
 }
