@@ -12,11 +12,16 @@ import (
 )
 
 type servantResponse struct {
-    ID          int         `json:"id"`
-    Name        string      `json:"name"`
-    ClassID     int         `json:"classId"`
-    Rarity      int         `json:"rarity"`
-    ExtraAssets extraAssets `json:"extraAssets"`
+    ID                 int                  `json:"id"`
+    Name               string               `json:"name"`
+    ClassID            int                  `json:"classId"`
+    Rarity             int                  `json:"rarity"`
+    ExtraAssets        extraAssets          `json:"extraAssets"`
+    Skills             []model.Skill        `json:"skills"`
+    Appends            []model.Skill        `json:"appendPassive"`
+    AscensionMaterials map[string]materials `json:"ascensionMaterials"`
+    SkillMaterials     map[string]materials `json:"skillMaterials"`
+    AppendMaterials    map[string]materials `json:"appendSkillMaterials"`
 }
 
 type extraAssets struct {
@@ -26,6 +31,22 @@ type extraAssets struct {
 
 type characterImages struct {
     Ascension map[string]string `json:"ascension"`
+}
+
+type materials struct {
+    Items []item `json:"items"`
+    QP    int    `json:"qp"`
+}
+
+type item struct {
+    Details itemDetails `json:"item"`
+    Amount  int         `json:"amount"`
+}
+
+type itemDetails struct {
+    ID   int    `json:"id"`
+    Name string `json:"name"`
+    Icon string `json:"icon"`
 }
 
 func SearchServant(c echo.Context) (err error) {
