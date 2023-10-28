@@ -1,0 +1,1 @@
+web: fgo-planner-api
