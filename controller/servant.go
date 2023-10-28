@@ -171,14 +171,63 @@ func GetServant(c echo.Context) (err error) {
         })
     }
 
+    skillMaterials := make([]model.MaterialList, 0, len(s.SkillMaterials))
+    keys = make([]string, 0, len(s.SkillMaterials))
+    for k := range s.SkillMaterials {
+        keys = append(keys, k)
+    }
+    sort.Strings(keys)
+    for _, v := range keys {
+        items := make([]model.Material, 0, len(s.SkillMaterials[v].Items))
+        for _, i := range s.SkillMaterials[v].Items {
+            items = append(items, model.Material{
+                ID:     i.Details.ID,
+                Name:   i.Details.Name,
+                Icon:   i.Details.Icon,
+                Amount: i.Amount,
+            })
+        }
+
+        skillMaterials = append(skillMaterials, model.MaterialList{
+            Materials: items,
+            QP:        s.SkillMaterials[v].QP,
+        })
+    }
+
+    appendMaterials := make([]model.MaterialList, 0, len(s.AppendMaterials))
+    keys = make([]string, 0, len(s.AppendMaterials))
+    for k := range s.SkillMaterials {
+        keys = append(keys, k)
+    }
+    sort.Strings(keys)
+    for _, v := range keys {
+        items := make([]model.Material, 0, len(s.AppendMaterials[v].Items))
+        for _, i := range s.AppendMaterials[v].Items {
+            items = append(items, model.Material{
+                ID:     i.Details.ID,
+                Name:   i.Details.Name,
+                Icon:   i.Details.Icon,
+                Amount: i.Amount,
+            })
+        }
+
+        appendMaterials = append(appendMaterials, model.MaterialList{
+            Materials: items,
+            QP:        s.AppendMaterials[v].QP,
+        })
+    }
+
     servant := model.Servant{
-        ID:        s.ID,
-        Name:      s.Name,
-        ClassIcon: fmt.Sprintf(constant.AtlasAcademyClassIcon, int(math.Min(3, float64(s.Rarity))), s.ClassID),
-        Icon:      s.ExtraAssets.Faces.Ascension["1"],
-        Portraits: portraits,
-        Skills:    skills,
-        Appends:   appends,
+        ID:                 s.ID,
+        Name:               s.Name,
+        ClassIcon:          fmt.Sprintf(constant.AtlasAcademyClassIcon, int(math.Min(3, float64(s.Rarity))), s.ClassID),
+        Icon:               s.ExtraAssets.Faces.Ascension["1"],
+        Portraits:          portraits,
+        Skills:             skills,
+        Appends:            appends,
+        AscensionMaterials: ascensionMaterials,
+        SkillMaterials:     skillMaterials,
+        AppendMaterials:    appendMaterials,
     }
 
     return c.JSON(http.StatusOK, servant)
