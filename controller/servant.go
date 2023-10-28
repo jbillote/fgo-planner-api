@@ -148,74 +148,9 @@ func GetServant(c echo.Context) (err error) {
         })
     }
 
-    ascensionMaterials := make([]model.MaterialList, 0, len(s.AscensionMaterials))
-    keys = make([]string, 0, len(s.AscensionMaterials))
-    for k := range s.AscensionMaterials {
-        keys = append(keys, k)
-    }
-    sort.Strings(keys)
-    for _, v := range keys {
-        items := make([]model.Material, 0, len(s.AscensionMaterials[v].Items))
-        for _, i := range s.AscensionMaterials[v].Items {
-            items = append(items, model.Material{
-                ID:     i.Details.ID,
-                Name:   i.Details.Name,
-                Icon:   i.Details.Icon,
-                Amount: i.Amount,
-            })
-        }
-
-        ascensionMaterials = append(ascensionMaterials, model.MaterialList{
-            Materials: items,
-            QP:        s.AscensionMaterials[v].QP,
-        })
-    }
-
-    skillMaterials := make([]model.MaterialList, 0, len(s.SkillMaterials))
-    keys = make([]string, 0, len(s.SkillMaterials))
-    for k := range s.SkillMaterials {
-        keys = append(keys, k)
-    }
-    sort.Strings(keys)
-    for _, v := range keys {
-        items := make([]model.Material, 0, len(s.SkillMaterials[v].Items))
-        for _, i := range s.SkillMaterials[v].Items {
-            items = append(items, model.Material{
-                ID:     i.Details.ID,
-                Name:   i.Details.Name,
-                Icon:   i.Details.Icon,
-                Amount: i.Amount,
-            })
-        }
-
-        skillMaterials = append(skillMaterials, model.MaterialList{
-            Materials: items,
-            QP:        s.SkillMaterials[v].QP,
-        })
-    }
-
-    appendMaterials := make([]model.MaterialList, 0, len(s.AppendMaterials))
-    keys = make([]string, 0, len(s.AppendMaterials))
-    for k := range s.SkillMaterials {
-        keys = append(keys, k)
-    }
-    sort.Strings(keys)
-    for _, v := range keys {
-        items := make([]model.Material, 0, len(s.AppendMaterials[v].Items))
-        for _, i := range s.AppendMaterials[v].Items {
-            items = append(items, model.Material{
-                ID:     i.Details.ID,
-                Name:   i.Details.Name,
-                Icon:   i.Details.Icon,
-                Amount: i.Amount,
-            })
-        }
-
-        appendMaterials = append(appendMaterials, model.MaterialList{
-            Materials: items,
-            QP:        s.AppendMaterials[v].QP,
-        })
-    }
+    ascensionMaterials := processMaterialList(s.AscensionMaterials)
+    skillMaterials := processMaterialList(s.SkillMaterials)
+    appendMaterials := processMaterialList(s.AppendMaterials)
 
     servant := model.Servant{
         ID:                 s.ID,
@@ -231,4 +166,37 @@ func GetServant(c echo.Context) (err error) {
     }
 
     return c.JSON(http.StatusOK, servant)
+}
+
+func getMaterialKeysSorted(s map[string]materials) []string {
+    keys := make([]string, 0, len(s))
+    for k := range s {
+        keys = append(keys, k)
+    }
+    sort.Strings(keys)
+
+    return keys
+}
+
+func processMaterialList(ml map[string]materials) []model.MaterialList {
+    m := make([]model.MaterialList, 0, len(ml))
+    keys := getMaterialKeysSorted(ml)
+    for _, v := range keys {
+        items := make([]model.Material, 0, len(ml[v].Items))
+        for _, i := range ml[v].Items {
+            items = append(items, model.Material{
+                ID:     i.Details.ID,
+                Name:   i.Details.Name,
+                Icon:   i.Details.Icon,
+                Amount: i.Amount,
+            })
+        }
+
+        m = append(m, model.MaterialList{
+            Materials: items,
+            QP:        ml[v].QP,
+        })
+    }
+
+    return m
 }
