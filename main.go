@@ -1,11 +1,13 @@
 package main
 
 import (
+    "fmt"
     "github.com/jbillote/fgo-planner-api/server"
     "os"
 )
 
 func main() {
     s := server.NewServer()
-    s.Start(os.Getenv("PORT"))
+    port := fmt.Sprintf(":%s", os.Getenv("PORT"))
+    s.Start(port)
 }
