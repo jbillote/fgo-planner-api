@@ -90,7 +90,7 @@ func GetServant(c echo.Context) (err error) {
 	}
 
 	portraits := make([]string, 0, len(s.ExtraAssets.CharacterGraph.Ascension))
-	keys := getKeysSorted(s.ExtraAssets.CharacterGraph.Ascension)
+	keys := getSortedKeys(s.ExtraAssets.CharacterGraph.Ascension)
 	for _, v := range keys {
 		portraits = append(portraits, s.ExtraAssets.CharacterGraph.Ascension[v])
 	}
@@ -165,7 +165,7 @@ func atlasGetServant(cid int) (servantResponse, error) {
 	return servantRes, nil
 }
 
-func getKeysSorted[V any](s map[string]V) []string {
+func getSortedKeys[V any](s map[string]V) []string {
 	keys := make([]string, 0, len(s))
 	for k := range s {
 		keys = append(keys, k)
@@ -177,7 +177,7 @@ func getKeysSorted[V any](s map[string]V) []string {
 
 func processMaterialList(ml map[string]materials) []model.MaterialList {
 	m := make([]model.MaterialList, 0, len(ml))
-	keys := getKeysSorted(ml)
+	keys := getSortedKeys(ml)
 	for _, v := range keys {
 		items := make([]model.Material, 0, len(ml[v].Items))
 		for _, i := range ml[v].Items {
