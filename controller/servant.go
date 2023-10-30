@@ -83,35 +83,14 @@ func GetServant(c echo.Context) (err error) {
 		c.Logger().Fatal(err)
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
-	uri := fmt.Sprintf(constant.AtlasAcademyServantInfo, id)
-
-	resp, err := http.Get(uri)
-	if err != nil {
-		c.Logger().Fatal(err)
-		return c.String(http.StatusInternalServerError, err.Error())
-	}
-
-	defer resp.Body.Close()
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		c.Logger().Fatal(err)
-		return c.String(http.StatusInternalServerError, err.Error())
-	}
-
-	var s servantResponse
-	err = json.Unmarshal(body, &s)
+	s, err := atlasGetServant(id)
 	if err != nil {
 		c.Logger().Fatal(err)
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
 
 	portraits := make([]string, 0, len(s.ExtraAssets.CharacterGraph.Ascension))
-	keys := make([]string, 0, len(s.ExtraAssets.CharacterGraph.Ascension))
-	for k := range s.ExtraAssets.CharacterGraph.Ascension {
-		keys = append(keys, k)
-	}
-	sort.Strings(keys)
+	keys := getKeysSorted(s.ExtraAssets.CharacterGraph.Ascension)
 	for _, v := range keys {
 		portraits = append(portraits, s.ExtraAssets.CharacterGraph.Ascension[v])
 	}
@@ -162,7 +141,31 @@ func atlasServantSearch(query string) ([]servantResponse, error) {
 	return servantRes, nil
 }
 
-func getMaterialKeysSorted(s map[string]materials) []string {
+func atlasGetServant(cid int) (servantResponse, error) {
+	var servantRes servantResponse
+	url := fmt.Sprintf(constant.AtlasAcademyServantInfo, cid)
+
+	resp, err := http.Get(url)
+	if err != nil {
+		return servantRes, err
+	}
+
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return servantRes, err
+	}
+
+	err = json.Unmarshal(body, &servantRes)
+	if err != nil {
+		return servantRes, err
+	}
+
+	return servantRes, nil
+}
+
+func getKeysSorted[V any](s map[string]V) []string {
 	keys := make([]string, 0, len(s))
 	for k := range s {
 		keys = append(keys, k)
@@ -174,7 +177,7 @@ func getMaterialKeysSorted(s map[string]materials) []string {
 
 func processMaterialList(ml map[string]materials) []model.MaterialList {
 	m := make([]model.MaterialList, 0, len(ml))
-	keys := getMaterialKeysSorted(ml)
+	keys := getKeysSorted(ml)
 	for _, v := range keys {
 		items := make([]model.Material, 0, len(ml[v].Items))
 		for _, i := range ml[v].Items {
