@@ -1,6 +1,10 @@
 package controller
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/jbillote/fgo-planner-api/model"
+)
 
 var mapUnsortedKeys = map[string]string{
 	"o": "test",
@@ -12,6 +16,13 @@ var mapSortedKeys = map[string]string{
 	"f": "test",
 	"g": "test",
 	"o": "test",
+}
+
+var arcSkills = []model.Skill{
+	{
+		Name: "Rainbow Mystic Eyes A",
+		Icon: "https://static.atlasacademy.io/JP/SkillIcons/skill_00512.png",
+	},
 }
 
 func TestGetSortedKeysSortedInput(t *testing.T) {

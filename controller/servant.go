@@ -95,7 +95,6 @@ func GetServant(c echo.Context) (err error) {
 		portraits = append(portraits, s.ExtraAssets.CharacterGraph.Ascension[v])
 	}
 
-	skills := processSkills(s.Skills)
 	appends := processAppends(s.Appends)
 	ascensionMaterials := processMaterialList(s.AscensionMaterials)
 	skillMaterials := processMaterialList(s.SkillMaterials)
@@ -107,7 +106,7 @@ func GetServant(c echo.Context) (err error) {
 		ClassIcon:          fmt.Sprintf(constant.AtlasAcademyClassIcon, classIconFilename(s.Rarity, s.ClassID)),
 		Icon:               s.ExtraAssets.Faces.Ascension["1"],
 		Portraits:          portraits,
-		Skills:             skills,
+		Skills:             s.Skills,
 		Appends:            appends,
 		AscensionMaterials: ascensionMaterials,
 		SkillMaterials:     skillMaterials,
@@ -196,18 +195,6 @@ func processMaterialList(ml map[string]materials) []model.MaterialList {
 	}
 
 	return m
-}
-
-func processSkills(ss []model.Skill) []model.Skill {
-	skills := make([]model.Skill, 0, len(ss))
-	for _, v := range ss {
-		skills = append(skills, model.Skill{
-			Name: v.Name,
-			Icon: v.Icon,
-		})
-	}
-
-	return skills
 }
 
 func processAppends(as []appendPassive) []model.Skill {
