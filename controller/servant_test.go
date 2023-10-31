@@ -18,17 +18,31 @@ var mapSortedKeys = map[string]string{
 	"o": "test",
 }
 
-var arcSkills = []model.Skill{
+var arcAppends = []appendPassive{
 	{
-		Name: "Rainbow Mystic Eyes A",
-		Icon: "https://static.atlasacademy.io/JP/SkillIcons/skill_00512.png",
+		Skill: model.Skill{
+			Name: "Extra Attack Boost",
+			Icon: "https://static.atlasacademy.io/JP/SkillIcons/skill_00301.png",
+		},
+	},
+	{
+		Skill: model.Skill{
+			Name: "Load Magical Energy",
+			Icon: "https://static.atlasacademy.io/JP/SkillIcons/skill_00601.png",
+		},
+	},
+	{
+		Skill: model.Skill{
+			Name: "Anti-Foreigner (ATK Up)",
+			Icon: "https://static.atlasacademy.io/JP/SkillIcons/skill_00300.png",
+		},
 	},
 }
 
 func TestGetSortedKeysSortedInput(t *testing.T) {
 	got := getSortedKeys(mapSortedKeys)
 	want := []string{"f", "g", "o"}
-	if !arrayEquality(got, want) {
+	if !stringArrayEquality(got, want) {
 		t.Errorf("Got %s, expected %s", got, want)
 	}
 }
@@ -36,7 +50,29 @@ func TestGetSortedKeysSortedInput(t *testing.T) {
 func TestGetSortedKeysUnsortedInput(t *testing.T) {
 	got := getSortedKeys(mapUnsortedKeys)
 	want := []string{"f", "g", "o"}
-	if !arrayEquality(got, want) {
+	if !stringArrayEquality(got, want) {
+		t.Errorf("Got %s, expected %s", got, want)
+	}
+}
+
+func TestProcessAppends(t *testing.T) {
+	got := processAppends(arcAppends)
+	want := []model.Skill{
+		{
+			Name: "Extra Attack Boost",
+			Icon: "https://static.atlasacademy.io/JP/SkillIcons/skill_00301.png",
+		},
+		{
+			Name: "Load Magical Energy",
+			Icon: "https://static.atlasacademy.io/JP/SkillIcons/skill_00601.png",
+		},
+		{
+			Name: "Anti-Foreigner (ATK Up)",
+			Icon: "https://static.atlasacademy.io/JP/SkillIcons/skill_00300.png",
+		},
+	}
+
+	if !skillArrayEquality(got, want) {
 		t.Errorf("Got %s, expected %s", got, want)
 	}
 }
@@ -65,13 +101,27 @@ func TestClassIconFilenameRarityNegative(t *testing.T) {
 	}
 }
 
-func arrayEquality(a []string, b []string) bool {
+func stringArrayEquality(a []string, b []string) bool {
 	if len(a) != len(b) {
 		return false
 	}
 
 	for i, v := range a {
 		if v != b[i] {
+			return false
+		}
+	}
+
+	return true
+}
+
+func skillArrayEquality(a []model.Skill, b []model.Skill) bool {
+	if len(a) != len(b) {
+		return false
+	}
+
+	for i, v := range a {
+		if v.Name != b[i].Name || v.Icon != b[i].Icon {
 			return false
 		}
 	}
