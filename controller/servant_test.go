@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -8,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/jbillote/fgo-planner-api/model"
+	"github.com/labstack/echo/v4"
 )
 
 var mapUnsortedKeys = map[string]string{
@@ -288,12 +290,95 @@ var processedArcAscMaterials = []model.MaterialList{
 	},
 }
 
+func TestSearchServant(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "nice/JP/servant/search?name=archetype&lang=en" {
+			t.Errorf("Got request to %s, expected nice/JP/servant/search?name=archetype&lang=en", r.URL.Path)
+		}
+		f, err := os.Open("../_testdata/atlas_servant_search.json")
+		if err != nil {
+			t.Error("Error loading mock response")
+		}
+		var resp []byte
+		f.Read(resp)
+
+		w.WriteHeader(http.StatusOK)
+		w.Write(resp)
+	}))
+	defer server.Close()
+
+	testFile, err := os.Open("../_testdata/servant_search.json")
+	if err != nil {
+		t.Error("Unable to open test data")
+	}
+	testFileString, err := io.ReadAll(testFile)
+	if err != nil {
+		t.Error("Unable to open test data")
+	}
+	want := string(testFileString)
+
+	e := echo.New()
+	rec := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodGet, "/api/fgo/v1/servant?query=archetype", nil)
+	c := e.NewContext(req, rec)
+
+	err = SearchServant(c)
+	got := rec.Body.String()
+
+	if want != got {
+		t.Errorf("Got %s, expected %s", got, want)
+	}
+}
+
+func TestGetServant(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "nice/JP/servant/2300500?lang=en" {
+			t.Errorf("Got request to %s, expected nice/JP/servant/2300500?lang=en", r.URL.Path)
+		}
+		f, err := os.Open("../_testdata/atlas_get_servant.json")
+		if err != nil {
+			t.Error("Error loading mock response")
+		}
+		var resp []byte
+		f.Read(resp)
+
+		w.WriteHeader(http.StatusOK)
+		w.Write(resp)
+	}))
+	defer server.Close()
+
+	testFile, err := os.Open("../_testdata/get_servant.json")
+	if err != nil {
+		t.Error("Unable to open test data")
+	}
+	testFileString, err := io.ReadAll(testFile)
+	if err != nil {
+		t.Error("Unable to open test data")
+	}
+	want := string(testFileString)
+
+	e := echo.New()
+	rec := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	c := e.NewContext(req, rec)
+	c.SetPath("api/fgo/v1/servant/:id")
+	c.SetParamNames("id")
+	c.SetParamValues("2300500")
+
+	err = GetServant(c)
+	got := rec.Body.String()
+
+	if want != got {
+		t.Errorf("Got %s, expected %s", got, want)
+	}
+}
+
 func TestAtlasServantSearchSuccessful(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path != "nice/JP/servant/search?name=2300500&lang=en" {
 			t.Errorf("Got request to %s, expected nice/JP/servant/search?name=2300500&lang=en", r.URL.Path)
 		}
-		f, err := os.Open("../_testdata/servant_search.json")
+		f, err := os.Open("../_testdata/atlas_servant_search.json")
 		if err != nil {
 			t.Error("Error loading mock response")
 		}
@@ -321,7 +406,7 @@ func TestAtlasGetServantSuccessful(t *testing.T) {
 		if r.URL.Path != "nice/JP/servant/2300500?lang=en" {
 			t.Errorf("Got request to %s, expected nice/JP/servant/2300500?lang=en", r.URL.Path)
 		}
-		f, err := os.Open("../_testdata/arc_response.json")
+		f, err := os.Open("../_testdata/atlas_get_servant.js")
 		if err != nil {
 			t.Error("Error loading mock response")
 		}
