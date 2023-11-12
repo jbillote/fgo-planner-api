@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"reflect"
 	"testing"
 
 	"github.com/jbillote/fgo-planner-api/model"
@@ -312,6 +313,34 @@ func TestAtlasServantSearchSuccessful(t *testing.T) {
 	// TODO: More meaningful test with values
 	if len(got) != 1 {
 		t.Errorf("Got array of length %d, expected 1", len(got))
+	}
+}
+
+func TestAtlasGetServantSuccessful(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "nice/JP/servant/2300500?lang=en" {
+			t.Errorf("Got request to %s, expected nice/JP/servant/2300500?lang=en", r.URL.Path)
+		}
+		f, err := os.Open("../_testdata/arc_response.json")
+		if err != nil {
+			t.Error("Error loading mock response")
+		}
+		var resp []byte
+		f.Read(resp)
+
+		w.WriteHeader(http.StatusOK)
+		w.Write(resp)
+	}))
+	defer server.Close()
+
+	got, err := atlasGetServant(2300500)
+	if err != nil {
+		t.Error(err)
+	}
+
+	// TODO: More meaningful test with values
+	if reflect.TypeOf(got) != reflect.TypeOf(servantResponse{}) {
+		t.Errorf("Got type of %s, expected servantResponse", reflect.TypeOf(got))
 	}
 }
 
