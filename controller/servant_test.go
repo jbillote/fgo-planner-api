@@ -1,6 +1,9 @@
 package controller
 
 import (
+	"net/http"
+	"net/http/httptest"
+	"os"
 	"testing"
 
 	"github.com/jbillote/fgo-planner-api/model"
@@ -282,6 +285,34 @@ var processedArcAscMaterials = []model.MaterialList{
 		},
 		QP: 3000000,
 	},
+}
+
+func TestAtlasServantSearchSuccessful(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "nice/JP/servant/search?name=2300500&lang=en" {
+			t.Errorf("Got request to %s, expected nice/JP/servant/search?name=2300500&lang=en", r.URL.Path)
+		}
+		f, err := os.Open("../_testdata/servant_search.json")
+		if err != nil {
+			t.Error("Error loading mock response")
+		}
+		var resp []byte
+		f.Read(resp)
+
+		w.WriteHeader(http.StatusOK)
+		w.Write(resp)
+	}))
+	defer server.Close()
+
+	got, err := atlasServantSearch("archetype")
+	if err != nil {
+		t.Error(err)
+	}
+
+	// TODO: More meaningful test with values
+	if len(got) != 1 {
+		t.Errorf("Got array of length %d, expected 1", len(got))
+	}
 }
 
 func TestGetSortedKeysSortedInput(t *testing.T) {
